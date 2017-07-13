@@ -8,8 +8,8 @@ var client = new twitter(keys.twitterKeys);
 var SpotifyWebApi = require('node-spotify-api');
 
 var spotify = new SpotifyWebApi(keys.spotifyKeys);
-var a;
-var b;
+var userCommand;
+var userResponse;
 
 
 inquirer.prompt([
@@ -25,8 +25,8 @@ inquirer.prompt([
         name: "choice"
     }
 ]).then(function(inquirerResponse){
-    a = inquirerResponse.command;
-    b = inquirerResponse.choice;
+    userCommand = inquirerResponse.command;
+    userResponse = inquirerResponse.choice;
     console.log(" ");
     console.log(" ");
     console.log(" ");
@@ -35,7 +35,7 @@ inquirer.prompt([
 
 
 function switchF(){
-    switch(a){
+    switch(userCommand){
         case "my-tweets":
             tweets();
             break;
@@ -58,7 +58,7 @@ function tweets(){
     client.get("statuses/user_timeline",{screen_name: "@lord_fluffy99", count: 20}, function(error,tweets,response){
         var myTweets = JSON.parse(response.body);
         //console.log(myTweets);
-        for(var i = 0; i < 20; i++){
+        for(var i = 0; i < myTweets.length; i++){
             console.log(myTweets[i].created_at);
             console.log(myTweets[i].text);
         }
@@ -67,10 +67,10 @@ function tweets(){
 }
 
 function spotifyF(){
-    if(b === ""){
-        b = "The Sign";
+    if(userResponse === ""){
+        userResponse = "The Sign";
     }
-    spotify.search({type: 'track', query: b}, function(error,data){
+    spotify.search({type: 'track', query: userResponse}, function(error,data){
         console.log("Artist: " + data.tracks.items[0].artists[0].name);
         console.log("Song Name: " + data.tracks.items[0].name);
         console.log("Preview Link: " + data.tracks.items[0].preview_url);
@@ -80,16 +80,16 @@ function spotifyF(){
 }
 
 function movie(){
-    if( b === ""){
-        b = "Mr. Nobody";
+    if( userResponse === ""){
+        userResponse = "Mr. Nobody";
     }
-    var queryUrl = "http://www.omdbapi.com/?apikey=40e9cece&t=" + b;
+    var queryUrl = "http://www.omdbapi.com/?apikey=40e9cece&t=" + userResponse;
     request(queryUrl, function(error, response, body){
         var movieInfo = JSON.parse(body);
         console.log("Title: " + movieInfo.Title);
         console.log("Year of Release: " + movieInfo.Year);
         console.log("IMDBRating: " + movieInfo.imdbRated);
-        console.log("Rotten Tomatoes Rating: " + movieInfo.Ratings[1].value);
+        console.log("Rotten Tomatoes Rating: " + movieInfo.Ratings[1].Value);
         console.log("Country Produced: " + movieInfo.Country);
         console.log("Language: " + movieInfo.Language);
         console.log("Plot: " + movieInfo.Plot);
@@ -101,15 +101,15 @@ function movie(){
 function doWhat(){
     fs.readFile("random.txt", "utf8", function(error, data){
         var dataArr = data.split(",", 2);
-        a = dataArr[0];
-        b = dataArr[1];
+        userCommand = dataArr[0];
+        userResponse = dataArr[1];
         switchF();
     })
     appendF();
 }
 function appendF(){
-    if( a !== "" ){
-        fs.appendFile("log.txt", a + " - " + b + ", ", function(err) {
+    if( userCommand !== "" ){
+        fs.appendFile("log.txt", userCommand + " - " + userResponse + ", ", function(err) {
             if(err){
                 console.log(err);
             }
